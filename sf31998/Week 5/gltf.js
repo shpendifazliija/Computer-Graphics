@@ -21,13 +21,37 @@ scene.add(ambientLight, directionalLight)
 
 const control = new OrbitControls(camera, renderer.domElement)
 
-
 const loader = new GLTFLoader()
 loader.load('public/model.glb', (gltf) => {
     gltf.scene.rotation.y = Math.PI
-    scene.add(gltf.scene);
-}); 
-// Log the total number of meshes in the scene, plus the vertex and face count of each mesh
+    scene.add(gltf.scene)
+
+    // Count all meshes and log vertices and faces for each mesh
+    let meshCount = 0
+
+    gltf.scene.traverse((object) => {
+        if (object.isMesh) {
+            meshCount++
+
+            const geometry = object.geometry
+            const vertices = geometry.attributes.position.count
+
+            let faces
+            if (geometry.index) {
+                faces = geometry.index.count / 3
+            } else {
+                faces = vertices / 3
+            }
+
+            console.log(`Mesh ${meshCount}: ${object.name || 'Unnamed'}`)
+            console.log(`Vertices: ${vertices}`)
+            console.log(`Faces: ${faces}`)
+        }
+    })
+
+    // Log the total number of meshes
+    console.log(`Total meshes: ${meshCount}`)
+})
 
 function animate() {
     requestAnimationFrame(animate)
